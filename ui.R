@@ -83,6 +83,8 @@ shinyUI(fluidPage(
                         ),
                         tabPanel("Predicted Probabilities",
                                  h4("Output"),
+                                 downloadButton('downloadData4', 
+                                                'Download Output File'), br(),
                                  DT::dataTableOutput("Prob"))
             )
         )
