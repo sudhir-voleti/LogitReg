@@ -77,11 +77,13 @@ shinyUI(fluidPage(
                         
                         tabPanel("Regression Results",
                                  h4(p("Coefficients")),
-                                 DT::dataTableOutput('OLSResult')
-                        )
-                        #tabPanel("Dataset Creation",
-                         #        h4("Double click to edit"),
-                         #        dt_output('Alter Rows', 'x1'))
+                                 DT::dataTableOutput('OLSResult'),
+                                 h4(p("Standard Errors")),
+                                 DT::dataTableOutput("StdErr")
+                        ),
+                        tabPanel("Predicted Probabilities",
+                                 h4("Output"),
+                                 DT::dataTableOutput("Prob"))
             )
         )
     )))
