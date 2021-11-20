@@ -115,7 +115,7 @@ shinyServer(function(input, output) {
         
         fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
         
-        DT::datatable(round(fit_ols$coefficients,3))
+        DT::datatable(t(round(fit_ols$coefficients,3)))
     })
     
     #d1 = iris
