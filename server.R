@@ -164,6 +164,26 @@ shinyServer(function(input, output) {
         DT::datatable(round(fitted(fit_ols),3))
     })
     
+    output$downloadData4 <- downloadHandler(
+        filename = function() { "logit_output.csv" },
+        content = function(file) {
+            
+            x <-input$xAttr
+            y <- input$yAttr
+            fx <- input$fxAttr
+            
+            
+            for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+            f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+            
+            fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
+            
+            t0 <- round(fitted(fit_ols),3)
+            
+            write.csv(t0, file, row.names=F)
+        }
+    )
+    
     output$downloadData <- downloadHandler(
         filename = function() { "binary.csv" },
         content = function(file) {
