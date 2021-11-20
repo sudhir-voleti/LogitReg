@@ -7,6 +7,8 @@ library(foreign)
 library(nnet)
 library(reshape2)
 
+
+
 dt_output = function(title, id) {
     fluidRow(column(
         12, h1(paste0('Table ', sub('.*?([0-9]+)$', '\\1', id), ': ', title)),
@@ -109,9 +111,9 @@ shinyServer(function(input, output) {
         
         #f <- reformulate(termlabels = c(x), response = y)
         
-        f <- paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+"))
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit_ols <- summary(glm(f, myData(), family = "binomial"))
+        fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
         
         DT::datatable(round(fit_ols$coefficients,3))
     })
