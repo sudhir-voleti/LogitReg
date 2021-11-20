@@ -78,8 +78,7 @@ shinyUI(fluidPage(
                         tabPanel("Regression Results",
                                  h4(p("Coefficients")),
                                  DT::dataTableOutput('OLSResult'),
-                                 h4(p("Standard Errors")),
-                                 DT::dataTableOutput("StdErr")
+                                
                         ),
                         tabPanel("Predicted Probabilities",
                                  h4("Output"),
