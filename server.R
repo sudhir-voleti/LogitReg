@@ -118,11 +118,51 @@ shinyServer(function(input, output) {
         DT::datatable(t(round(fit_ols$coefficients,3)))
     })
     
-    #d1 = iris
+    output$StdErr <- DT::renderDataTable({
+        x <-input$xAttr
+        y <- input$yAttr
+        fx <- input$fxAttr
+        
+        # Reformulate command concatenates termlabels with + in between 
+        # with response as dependent variable as a formula; 
+        # to force factor variables to be read as.factor() 
+        # is attached to the list of fx variables
+        
+        
+        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+        #f <- as.formula(paste(y, paste(x, collapse = '+'), sep = " ~ "))
+        
+        #f <- reformulate(termlabels = c(x), response = y)
+        
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+        
+        fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
+        
+        DT::datatable(t(round(fit_ols$standard.errors,3)))
+    })
     
-    #output$x1 = render_dt(d1, 'cell', FALSE)
-    
-    #observe(str(input$x1_cell_edit))
+    output$Prob <- DT::renderDataTable({
+        x <-input$xAttr
+        y <- input$yAttr
+        fx <- input$fxAttr
+        
+        # Reformulate command concatenates termlabels with + in between 
+        # with response as dependent variable as a formula; 
+        # to force factor variables to be read as.factor() 
+        # is attached to the list of fx variables
+        
+        
+        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+        #f <- as.formula(paste(y, paste(x, collapse = '+'), sep = " ~ "))
+        
+        #f <- reformulate(termlabels = c(x), response = y)
+        
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+        
+        fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
+        
+        DT::datatable(round(fitted(fit_ols),3))
+    })
     
     output$downloadData <- downloadHandler(
         filename = function() { "binary.csv" },
