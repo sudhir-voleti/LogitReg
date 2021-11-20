@@ -115,31 +115,18 @@ shinyServer(function(input, output) {
         
         fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
         
-        DT::datatable(t(round(fit_ols$coefficients,3)))
+        a <- t(fit_ols$coefficients)
+        colnames(a) <- paste("Coeff", colnames(a), sep = "_")
+        
+        b <- t((fit_ols$coefficients)/(fit_ols$standard.errors))
+        colnames(b) <- paste("PVal", colnames(b), sep = "_")
+        
+        res_table <- cbind(a,b)
+        
+        DT::datatable(round(res_table,3))
     })
     
-    output$StdErr <- DT::renderDataTable({
-        x <-input$xAttr
-        y <- input$yAttr
-        fx <- input$fxAttr
-        
-        # Reformulate command concatenates termlabels with + in between 
-        # with response as dependent variable as a formula; 
-        # to force factor variables to be read as.factor() 
-        # is attached to the list of fx variables
-        
-        
-        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
-        #f <- as.formula(paste(y, paste(x, collapse = '+'), sep = " ~ "))
-        
-        #f <- reformulate(termlabels = c(x), response = y)
-        
-        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
-        
-        fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
-        
-        DT::datatable(t(round(fit_ols$standard.errors,3)))
-    })
+    
     
     output$Prob <- DT::renderDataTable({
         x <-input$xAttr
