@@ -80,7 +80,7 @@ shinyServer(function(input, output) {
     
     output$summaryX <- DT::renderDataTable({
         df <- myData()
-        print("Summary for Selected X variable(s).")
+        #print("Summary for Selected X variable(s).")
         
         DT::datatable(do.call(cbind, lapply(df[, input$xAttr], summary)))
         
@@ -148,7 +148,14 @@ shinyServer(function(input, output) {
         
         fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
         
-        DT::datatable(round(fitted(fit_ols),3))
+        segm <- max.col(fitted(fit_ols))
+        
+        result <- round(fitted(fit_ols),3)
+        
+        t0 <- cbind(result, segm)
+        
+        
+        DT::datatable(t0)
     })
     
     output$downloadData4 <- downloadHandler(
@@ -164,8 +171,11 @@ shinyServer(function(input, output) {
             f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
             
             fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
+            segm <- max.col(fitted(fit_ols))
             
-            t0 <- round(fitted(fit_ols),3)
+            result <- round(fitted(fit_ols),3)
+            
+            t0 <- cbind(result, segm)
             
             write.csv(t0, file, row.names=F)
         }
