@@ -30,6 +30,8 @@ shinyUI(fluidPage(
             htmlOutput("xvarselect"),
             htmlOutput("fxvarselect"),
             
+            sliderInput('sample','Validation Sample Proportion',10,50,30),
+            
         ),
         
         
@@ -78,6 +80,9 @@ shinyUI(fluidPage(
                         tabPanel("Regression Results",
                                  h4(p("Coefficients")),
                                  DT::dataTableOutput('OLSResult'),
+                                 h4(p("Variable Importance")),
+                                 plotOutput('VarImp'),
+                                 verbatimTextOutput('ConfMatrx')
                                 
                         ),
                         tabPanel("Predicted Probabilities",
