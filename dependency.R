@@ -7,6 +7,8 @@ if(!require("DT")){install.packages("DT")}
 if(!require("nnet")){install.packages("nnet")}
 if(!require("reshape2")){install.packages("reshape2")}
 if(!require("rpart")){install.packages("rpart")}
+if(!require("caret")){install.packages("caret")}
+
 
 library(tidyverse)
 library(DT)
@@ -17,3 +19,4 @@ library(foreign)
 library(nnet)
 library(reshape2)
 library(rpart)
+library(caret)
