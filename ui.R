@@ -30,7 +30,7 @@ shinyUI(fluidPage(
             htmlOutput("xvarselect"),
             htmlOutput("fxvarselect"),
             
-            sliderInput('sample','Validation Sample Proportion',10,50,30),
+            #sliderInput('sample','Validation Sample Proportion',10,50,30),
             
         ),
         
@@ -82,7 +82,10 @@ shinyUI(fluidPage(
                                  DT::dataTableOutput('OLSResult'),
                                  h4(p("Variable Importance")),
                                  plotOutput('VarImp'),
-                                 verbatimTextOutput('ConfMatrx')
+                                 h4(p('Confusion Matrix')),
+                                 verbatimTextOutput('ConfMatrx'),
+                                 h4(p('Accuracy')),
+                                 verbatimTextOutput('accuracy')
                                 
                         ),
                         tabPanel("Predicted Probabilities",
