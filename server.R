@@ -19,7 +19,6 @@ render_dt = function(data, editable = 'cell', server = TRUE, ...) {
     renderDT(data, selection = 'none', server = server, editable = editable, ...)
 }
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
     
@@ -157,7 +156,7 @@ shinyServer(function(input, output) {
         myData()[testsample(),]
     })
     
-    output$ConfMatrx <- renderText({
+    output$ConfMatrx <- renderPrint({
         x <-input$xAttr
         
         y <- input$yAttr
@@ -169,14 +168,40 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit <- multinom(f, data = as.data.frame(myData()))
+        fit <- multinom(f, data = as.data.frame(myData()), trace = FALSE)
         
-        training_pred <- predict(fit, train_data(), type = "class")
-        cat('Still working on this!')
-        #confusionMatrix(table(as.factor(training_pred), as.data.frame(myData()[y,])))
-        #Does not Manifest
+        training_pred <- predict(fit, myData(), type = "class")
+        truth <- myData()[,y]
+        
+        xtab <- table(training_pred, truth)
+        
+        xtab
+        
     })
     
+    output$accuracy <-renderPrint({
+        x <-input$xAttr
+        
+        y <- input$yAttr
+        
+        fx <- input$fxAttr
+        
+        set.seed(12345)
+        
+        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+        
+        fit <- multinom(f, data = as.data.frame(myData()), trace = FALSE)
+        
+        training_pred <- predict(fit, myData(), type = "class")
+        truth <- myData()[,y]
+        
+        xtab <- table(training_pred, truth)
+        
+        accuracy = (sum(diag(xtab))/sum(xtab))*100
+        
+        accuracy
+    })
     
     output$Prob <- DT::renderDataTable({
         x <-input$xAttr
