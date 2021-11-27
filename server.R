@@ -222,7 +222,7 @@ shinyServer(function(input, output) {
         predicted_Y <- max.col(fitted(fit_ols))
         
         result <- round(fitted(fit_ols),3)
-        
+        colnames(result) <- paste("Y ", colnames(result), sep = "=")
         t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
@@ -241,7 +241,7 @@ shinyServer(function(input, output) {
         predicted_Y <- max.col(fitted(fit_ols))
         
         result <- round(fitted(fit_ols),3)
-        
+        colnames(result) <- paste("Y ", colnames(result), sep = "=")
         t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
