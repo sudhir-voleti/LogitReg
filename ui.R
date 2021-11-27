@@ -32,6 +32,8 @@ shinyUI(fluidPage(
             
             sliderInput('sample','Validation Sample Proportion',10,50,30),
             
+            fileInput("filep", "Upload Prediction data in csv")
+            
         ),
         
         
@@ -56,7 +58,7 @@ shinyUI(fluidPage(
                                    your offer or make decisions about the offer itself."),
                                 p(a("Source", href="https://www.ibm.com/topics/logistic-regression"), align="right"),
                                  h4(p("Download Sample Input File")),
-                                 downloadButton('downloadData', 'Download Example file'),
+                                 downloadButton('downloadData', 'Download Example file')
                                  
                                  
                         ),
@@ -95,7 +97,12 @@ shinyUI(fluidPage(
                                  DT::dataTableOutput("Prob"),
                         downloadButton('downloadData5', 
                                        'Download Output File for Training Set'), br(),
-                        DT::dataTableOutput("Prob2"))
+                        DT::dataTableOutput("Prob2")),
+                        tabPanel("Prediction",br(),
+                                 h4("Data used for Prediction"),
+                                 DT::dataTableOutput('contents'),
+                                 h4("First 10 rows of predicted data"),
+                                 dataTableOutput('prediction')
             )
         )
-    )))
+    ))))
