@@ -222,7 +222,9 @@ shinyServer(function(input, output) {
         predicted_Y <- max.col(fitted(fit_ols))
         
         result <- round(fitted(fit_ols),3)
+        
         colnames(result) <- paste("Y ", colnames(result), sep = "=")
+        
         t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
@@ -247,6 +249,47 @@ shinyServer(function(input, output) {
         DT::datatable(t0)
     })
     
+    pred.readdata <- reactive({
+        if (is.null(input$filep)) { return(NULL) }
+        else{
+            readdata <- as.data.frame(read.csv(input$filep$datapath ,header=TRUE, sep = ","))
+            return(readdata)
+        }
+    })
+    
+    output$contents2 <- DT::renderDataTable({
+        head(DT::datatable(pred.readdata()),10)
+    })
+    
+    output$prediction =  renderDataTable({
+        if (is.null(input$filep)) {return(NULL)}
+        x <-input$xAttr
+        
+        y <- input$yAttr
+        
+        fx <- input$fxAttr
+        
+        set.seed(12345)
+        
+        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+        
+        fit <- multinom(f, data = as.data.frame(train_data()), trace = FALSE)
+        
+        training_pred <- predict(fit, as.data.frame(pred.readdata()), type = "probs")
+        
+        colnames(training_pred) <- paste("Probability that Y ", colnames(training_pred), sep = "=")
+        
+        result <- round(head(training_pred,10),4)
+        
+        predicted_Y <- max.col(training_pred)
+        
+        
+        
+        t0 <- cbind(result, predicted_Y)
+        
+        t0
+    })
     
     output$downloadData4 <- downloadHandler(
         filename = function() { "logit_output_test.csv" },
