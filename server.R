@@ -81,7 +81,7 @@ shinyServer(function(input, output) {
         df <- myData()
         #print("Summary for Selected X variable(s).")
         
-        DT::datatable(do.call(cbind, lapply(df[, input$xAttr], summary)))
+        DT::datatable(t(do.call(cbind, lapply(df[, input$xAttr], summary))))
         
     })    
     
@@ -92,6 +92,19 @@ shinyServer(function(input, output) {
         df <- myData()
         #f <- as.formula(~input$yAttr + input$fxAttr)
         DT::datatable(xtabs(as.formula(paste0("~",input$fxAttr,"+",input$yAttr)), data = df))
+    })
+    
+    testsample =  reactive({
+        set.seed(12345)
+        sample(1:nrow(myData()), round(nrow(myData())*((input$sample)/100)))
+    })
+    
+    train_data = reactive({
+        myData()[-testsample(),]
+    })
+    
+    test_data = reactive({
+        myData()[testsample(),]
     })
     
     output$OLSResult <- DT::renderDataTable({
@@ -112,7 +125,7 @@ shinyServer(function(input, output) {
         
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
+        fit_ols <- summary(multinom(f, data = as.data.frame(train_data())))
         
         a <- t(fit_ols$coefficients)
         colnames(a) <- paste("Coeff", colnames(a), sep = "_")
@@ -123,7 +136,11 @@ shinyServer(function(input, output) {
         
         res_table <- cbind(a,b)
         
-        DT::datatable(round(res_table,5))
+        Coeff_0 <- matrix(0, dim(res_table)[1])
+        
+        res_table <- cbind(Coeff_0, res_table)
+        colnames(res_table)[1] <- "Coeff_1"
+        DT::datatable(round(res_table,3))
     })
     
     output$VarImp <- renderPlot({
@@ -135,7 +152,7 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit_ols <- rpart(f, data = as.data.frame(myData()))
+        fit_ols <- rpart(f, data = as.data.frame(train_data()))
         
         df <- as.data.frame(fit_ols$variable.importance)
         
@@ -143,18 +160,7 @@ shinyServer(function(input, output) {
         
     })
     
-    testsample =  reactive({
-        set.seed(12345)
-        sample(1:nrow(myData()), round(nrow(myData())*((input$sample)/100)))
-    })
     
-    train_data = reactive({
-        myData()[-testsample(),]
-    })
-    
-    test_data = reactive({
-        myData()[testsample(),]
-    })
     
     output$ConfMatrx <- renderPrint({
         x <-input$xAttr
@@ -168,12 +174,12 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit <- multinom(f, data = as.data.frame(myData()), trace = FALSE)
+        fit <- multinom(f, data = as.data.frame(test_data()), trace = FALSE)
         
-        training_pred <- predict(fit, myData(), type = "class")
-        truth <- myData()[,y]
+        predicted_Y <- predict(fit, test_data(), type = "class")
+        Actual_Y <- test_data()[,y]
         
-        xtab <- table(training_pred, truth)
+        xtab <- table(predicted_Y, Actual_Y)
         
         xtab
         
@@ -191,10 +197,10 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit <- multinom(f, data = as.data.frame(myData()), trace = FALSE)
+        fit <- multinom(f, data = as.data.frame(test_data()), trace = FALSE)
         
-        training_pred <- predict(fit, myData(), type = "class")
-        truth <- myData()[,y]
+        training_pred <- predict(fit, test_data(), type = "class")
+        truth <- test_data()[,y]
         
         xtab <- table(training_pred, truth)
         
@@ -211,19 +217,39 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
+        fit_ols <- summary(multinom(f, data = as.data.frame(train_data())))
         
-        segment <- max.col(fitted(fit_ols))
+        predicted_Y <- max.col(fitted(fit_ols))
         
         result <- round(fitted(fit_ols),3)
         
-        t0 <- cbind(result, segment)
+        t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
     })
     
+    output$Prob2 <- DT::renderDataTable({
+        x <-input$xAttr
+        y <- input$yAttr
+        fx <- input$fxAttr
+        
+        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+        
+        fit_ols <- summary(multinom(f, data = as.data.frame(test_data())))
+        
+        predicted_Y <- max.col(fitted(fit_ols))
+        
+        result <- round(fitted(fit_ols),3)
+        
+        t0 <- cbind(result, predicted_Y)
+        
+        DT::datatable(t0)
+    })
+    
+    
     output$downloadData4 <- downloadHandler(
-        filename = function() { "logit_output.csv" },
+        filename = function() { "logit_output_test.csv" },
         content = function(file) {
             
             x <-input$xAttr
@@ -234,16 +260,41 @@ shinyServer(function(input, output) {
             for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
             f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
             
-            fit_ols <- summary(multinom(f, data = as.data.frame(myData())))
-            segm <- max.col(fitted(fit_ols))
+            fit_ols <- summary(multinom(f, data = as.data.frame(test_data())))
+            Predicted_Y <- max.col(fitted(fit_ols))
             
             result <- round(fitted(fit_ols),3)
             
-            t0 <- cbind(result, segm)
+            t0 <- cbind(result, Predicted_Y)
             
             write.csv(t0, file, row.names=F)
         }
     )
+    
+    output$downloadData5 <- downloadHandler(
+        filename = function() { "logit_output_train.csv" },
+        content = function(file) {
+            
+            x <-input$xAttr
+            y <- input$yAttr
+            fx <- input$fxAttr
+            
+            
+            for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+            f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+            
+            fit_ols <- summary(multinom(f, data = as.data.frame(train_data())))
+            Predicted_Y <- max.col(fitted(fit_ols))
+            
+            result <- round(fitted(fit_ols),3)
+            
+            t0 <- cbind(result, Predicted_Y)
+            
+            write.csv(t0, file, row.names=F)
+        }
+    )
+    
+    
     
     output$downloadData <- downloadHandler(
         filename = function() { "binary.csv" },
