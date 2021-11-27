@@ -30,7 +30,7 @@ shinyUI(fluidPage(
             htmlOutput("xvarselect"),
             htmlOutput("fxvarselect"),
             
-            #sliderInput('sample','Validation Sample Proportion',10,50,30),
+            sliderInput('sample','Validation Sample Proportion',10,50,30),
             
         ),
         
@@ -71,28 +71,31 @@ shinyUI(fluidPage(
                                  h4(p("Barplot for Chosen Y")),
                                  plotOutput('YVarPlot'),
                                  h4(p("Summary for Chosen X Variable(s):")),
-                                 DT::dataTableOutput('summaryX'),
-                                 h4(p("Two-way Contingency Table")),
-                                 p('To ensure no 0 cells exist'),
-                                 DT::dataTableOutput('CrossValidnTable')
+                                 DT::dataTableOutput('summaryX')
+                                 #h4(p("Two-way Contingency Table")),
+                                 #p('To ensure no 0 cells exist'),
+                                 #DT::dataTableOutput('CrossValidnTable')
                         ),
                         
                         tabPanel("Regression Results",
-                                 h4(p("Coefficients")),
+                                 h4(p("Coefficients - Training Data")),
                                  DT::dataTableOutput('OLSResult'),
                                  h4(p("Variable Importance")),
                                  plotOutput('VarImp'),
-                                 h4(p('Confusion Matrix')),
+                                 h4(p('Confusion Matrix (Default at 30% holdout level) Test Data')),
                                  verbatimTextOutput('ConfMatrx'),
-                                 h4(p('Accuracy')),
+                                 h4(p('Accuracy (in %) Test Data')),
                                  verbatimTextOutput('accuracy')
                                 
                         ),
                         tabPanel("Predicted Probabilities",
                                  h4("Output"),
                                  downloadButton('downloadData4', 
-                                                'Download Output File'), br(),
-                                 DT::dataTableOutput("Prob"))
+                                                'Download Output File for Test Set'), br(),
+                                 DT::dataTableOutput("Prob"),
+                        downloadButton('downloadData5', 
+                                       'Download Output File for Training Set'), br(),
+                        DT::dataTableOutput("Prob2"))
             )
         )
     )))
