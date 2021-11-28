@@ -32,8 +32,6 @@ shinyUI(fluidPage(
             
             sliderInput('sample','Validation Sample Proportion',10,50,30),
             
-            fileInput("filep", "Upload Prediction data in csv")
-            
         ),
         
         
@@ -50,22 +48,21 @@ shinyUI(fluidPage(
                                    Your analysis can look at known characteristics of visitors, 
                                    such as sites they came from, repeat visits to your site, 
                                    behavior on your site (independent variables). "),
-                                   br(),
-                                   p("Logistic regression models help you determine a
+                                 br(),
+                                 p("Logistic regression models help you determine a
                                    probability of what type of visitors are likely 
                                    to accept the offer — or not. As a result, 
                                    you can make better decisions about promoting 
                                    your offer or make decisions about the offer itself."),
-                                p(a("Source", href="https://www.ibm.com/topics/logistic-regression"), align="right"),
-                                 h4(p("Download Sample Input File")),
-                                 downloadButton('downloadData', 'Download Example file')
+                                 p(a("Source", href="https://www.ibm.com/topics/logistic-regression"), align="right"),
+                                 
                                  
                                  
                         ),
                         
                         tabPanel("Data", 
                                  DT::dataTableOutput('contents')
-                         ),
+                        ),
                         
                         tabPanel("Summary",
                                  h4(p("Summary for Chosen Y variable:")),
@@ -88,21 +85,16 @@ shinyUI(fluidPage(
                                  verbatimTextOutput('ConfMatrx'),
                                  h4(p('Accuracy (in %) Test Data')),
                                  verbatimTextOutput('accuracy')
-                                
+                                 
                         ),
                         tabPanel("Predicted Probabilities",
                                  h4("Output"),
                                  downloadButton('downloadData4', 
                                                 'Download Output File for Test Set'), br(),
                                  DT::dataTableOutput("Prob"),
-                        downloadButton('downloadData5', 
-                                       'Download Output File for Training Set'), br(),
-                        DT::dataTableOutput("Prob2")),
-                        tabPanel("Prediction",br(),
-                                 h4("Data used for Prediction"),
-                                 DT::dataTableOutput('contents'),
-                                 h4("First 10 rows of predicted data"),
-                                 dataTableOutput('prediction')
+                                 downloadButton('downloadData5', 
+                                                'Download Output File for Training Set'), br(),
+                                 DT::dataTableOutput("Prob2"))
             )
         )
-    ))))
+    )))
