@@ -20,7 +20,7 @@ render_dt = function(data, editable = 'cell', server = TRUE, ...) {
 }
 
 shinyServer(function(input, output) {
-
+    
     
     myData <- reactive({
         inFile <- input$file
@@ -46,7 +46,7 @@ shinyServer(function(input, output) {
         if (identical(myData(), '') || identical(myData(),data.frame())) return(NULL)
         
         selectInput("xAttr", label = "Select X variables",
-                           multiple = TRUE, selectize = TRUE,
+                    multiple = TRUE, selectize = TRUE,
                     selected = setdiff(colnames(myData()),input$yAttr),choices = setdiff(colnames(myData()),input$yAttr)
         )
         
@@ -89,10 +89,10 @@ shinyServer(function(input, output) {
     output$CrossValidnTable <- renderDataTable(
         if (is.null(input$file)) {return(NULL)}
         else{
-        df <- myData()
-        #f <- as.formula(~input$yAttr + input$fxAttr)
-        DT::datatable(xtabs(as.formula(paste0("~",input$fxAttr,"+",input$yAttr)), data = df))
-    })
+            df <- myData()
+            #f <- as.formula(~input$yAttr + input$fxAttr)
+            DT::datatable(xtabs(as.formula(paste0("~",input$fxAttr,"+",input$yAttr)), data = df))
+        })
     
     testsample =  reactive({
         set.seed(12345)
@@ -119,9 +119,6 @@ shinyServer(function(input, output) {
         
         
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
-        #f <- as.formula(paste(y, paste(x, collapse = '+'), sep = " ~ "))
-        
-        #f <- reformulate(termlabels = c(x), response = y)
         
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
@@ -142,6 +139,8 @@ shinyServer(function(input, output) {
         colnames(res_table)[1] <- "Coeff_1"
         DT::datatable(round(res_table,3))
     })
+    
+    
     
     output$VarImp <- renderPlot({
         x <-input$xAttr
@@ -222,9 +221,7 @@ shinyServer(function(input, output) {
         predicted_Y <- max.col(fitted(fit_ols))
         
         result <- round(fitted(fit_ols),3)
-        
         colnames(result) <- paste("Y ", colnames(result), sep = "=")
-        
         t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
@@ -249,47 +246,6 @@ shinyServer(function(input, output) {
         DT::datatable(t0)
     })
     
-    pred.readdata <- reactive({
-        if (is.null(input$filep)) { return(NULL) }
-        else{
-            readdata <- as.data.frame(read.csv(input$filep$datapath ,header=TRUE, sep = ","))
-            return(readdata)
-        }
-    })
-    
-    output$contents2 <- DT::renderDataTable({
-        head(DT::datatable(pred.readdata()),10)
-    })
-    
-    output$prediction =  renderDataTable({
-        if (is.null(input$filep)) {return(NULL)}
-        x <-input$xAttr
-        
-        y <- input$yAttr
-        
-        fx <- input$fxAttr
-        
-        set.seed(12345)
-        
-        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
-        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
-        
-        fit <- multinom(f, data = as.data.frame(train_data()), trace = FALSE)
-        
-        training_pred <- predict(fit, as.data.frame(pred.readdata()), type = "probs")
-        
-        colnames(training_pred) <- paste("Probability that Y ", colnames(training_pred), sep = "=")
-        
-        result <- round(head(training_pred,10),4)
-        
-        predicted_Y <- max.col(training_pred)
-        
-        
-        
-        t0 <- cbind(result, predicted_Y)
-        
-        t0
-    })
     
     output$downloadData4 <- downloadHandler(
         filename = function() { "logit_output_test.csv" },
@@ -339,10 +295,5 @@ shinyServer(function(input, output) {
     
     
     
-    output$downloadData <- downloadHandler(
-        filename = function() { "binary.csv" },
-        content = function(file) {
-            write.csv(read.csv("data/binary.csv"), file, row.names=F, col.names=F)
-        }
-    )
+    
 })
