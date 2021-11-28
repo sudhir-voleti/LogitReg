@@ -33,6 +33,15 @@ shinyServer(function(input, output) {
         DT::datatable(myData())       
     })
     
+    pred.readdata <- reactive({
+        if (is.null(input$filep)) { return(NULL) }
+        else{
+            readdata <- as.data.frame(read.csv(input$filep$datapath ,header=TRUE, sep = ","))
+            return(readdata)
+        }
+    })
+    
+    
     output$yvarselect <- renderUI({
         if (is.null(input$file)) {return(NULL)}
         
@@ -173,7 +182,7 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit <- multinom(f, data = as.data.frame(test_data()), trace = FALSE)
+        fit <- multinom(f, data = as.data.frame(train_data()), trace = FALSE)
         
         predicted_Y <- predict(fit, test_data(), type = "class")
         Actual_Y <- test_data()[,y]
@@ -196,7 +205,7 @@ shinyServer(function(input, output) {
         for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
         f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
         
-        fit <- multinom(f, data = as.data.frame(test_data()), trace = FALSE)
+        fit <- multinom(f, data = as.data.frame(train_data()), trace = FALSE)
         
         training_pred <- predict(fit, test_data(), type = "class")
         truth <- test_data()[,y]
@@ -246,7 +255,38 @@ shinyServer(function(input, output) {
         DT::datatable(t0)
     })
     
+
+    output$prediction =  renderDataTable({
+        if (is.null(input$filep)) {return(NULL)}
+        x <-input$xAttr
+        
+        y <- input$yAttr
+        
+        fx <- input$fxAttr
+        
+        set.seed(12345)
+        
+        for (i0 in (which(x %in% fx == TRUE))){x[i0] <- paste('as.factor(',x[i0],')')}
+        f <- as.formula(paste(paste(y, collapse = "+"),'~', paste(x, collapse = "+")))
+        
+        fit <- multinom(f, data = as.data.frame(train_data()), trace = FALSE)
+        
+        training_pred <- predict(fit, as.data.frame(pred.readdata()), type = "probs")
+        
+        colnames(training_pred) <- paste("Probability that Y ", colnames(training_pred), sep = "=")
+        
+        result <- round(training_pred,4)
+        
+        predicted_Y <- max.col(training_pred)
+        
+        
+        t0 <- cbind(result, predicted_Y)
+        
+        t0
+    })
     
+    
+        
     output$downloadData4 <- downloadHandler(
         filename = function() { "logit_output_test.csv" },
         content = function(file) {
