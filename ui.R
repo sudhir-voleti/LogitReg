@@ -32,6 +32,8 @@ shinyUI(fluidPage(
             
             sliderInput('sample','Validation Sample Proportion',10,50,30),
             
+            fileInput("filep", "Upload Prediction data in csv")
+            
         ),
         
         
@@ -94,7 +96,9 @@ shinyUI(fluidPage(
                                  DT::dataTableOutput("Prob"),
                                  downloadButton('downloadData5', 
                                                 'Download Output File for Training Set'), br(),
-                                 DT::dataTableOutput("Prob2"))
+                                 DT::dataTableOutput("Prob2"),
+                                h4("First 10 rows of predicted data"),
+                                dataTableOutput('prediction'))
             )
         )
     )))
