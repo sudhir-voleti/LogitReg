@@ -231,6 +231,12 @@ shinyServer(function(input, output) {
         
         result <- round(fitted(fit_ols),3)
         colnames(result) <- paste("Y ", colnames(result), sep = "=")
+        
+        actual_y <- as.data.frame(test_data())[,y]
+        
+        result <- cbind(result, actual_y)
+        
+        
         t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
@@ -250,6 +256,11 @@ shinyServer(function(input, output) {
         
         result <- round(fitted(fit_ols),3)
         colnames(result) <- paste("Y ", colnames(result), sep = "=")
+        
+        actual_y <- as.data.frame(test_data())[,y]
+        
+        result <- cbind(result, actual_y)
+        
         t0 <- cbind(result, predicted_Y)
         
         DT::datatable(t0)
