@@ -6,7 +6,7 @@ library(ggplot2)
 library(foreign)
 library(nnet)
 library(reshape2)
-
+library(rpart)
 
 
 dt_output = function(title, id) {
@@ -64,7 +64,7 @@ shinyServer(function(input, output) {
     output$fxvarselect <- renderUI({
         if (identical(myData(), '') || identical(myData(),data.frame())) return(NULL)
         
-        selectInput("fxAttr", label = "Select X(Factor) variables",multiple = TRUE,
+        selectInput("fxAttr", label = "Select non-metric X variables",multiple = TRUE,
                     selectize = TRUE,
                     selected = setdiff(colnames(myData()),input$yAttr),choices = setdiff(colnames(myData()),input$yAttr)
         )
